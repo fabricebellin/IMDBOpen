@@ -6,7 +6,7 @@ import static org.mockito.Mockito.*;
 
 import entities.business.role.Role;
 import persistence.repository.IRoleRepository;
-import Web.Model.DTO.RoleDTO;
+import web.model.dto.RoleDTO;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ public class RoleServiceTest {
         role.setRoleName("Admin");
         when(roleRepository.save(any(Role.class))).thenReturn(role);
 
-        RoleDTO roleDTO = new Web.Model.DTO.RoleDTO();
+        RoleDTO roleDTO = new RoleDTO();
         roleDTO.setRoleName("Admin");
 
         RoleDTO result = roleService.createRole(roleDTO);

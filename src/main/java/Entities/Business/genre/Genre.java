@@ -1,6 +1,7 @@
 package entities.business.genre;
 
-import Entities.Business.Film.Film;
+
+import entities.business.Film.Film;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

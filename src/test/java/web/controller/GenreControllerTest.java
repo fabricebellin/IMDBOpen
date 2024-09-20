@@ -1,6 +1,6 @@
 package web.controller;
 
-import Entities.Business.genre.Genre;
+import entities.business.genre.Genre;
 import service.GenreService;
 import web.model.dto.GenreDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;

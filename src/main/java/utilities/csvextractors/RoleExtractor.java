@@ -1,6 +1,7 @@
 package utilities.csvextractors;
 
-import Entities.Business.role.Role;
+
+import entities.business.role.Role;
 import persistence.repository.IActeurRepository;
 import persistence.repository.IFilmRepository;
 import persistence.repository.IRoleRepository;
