@@ -36,12 +36,19 @@ jobs:
         run: |
           docker compose -f Docker/docker-compose.yml build  # Build all services defined in Docker/docker-compose.yml
 
+      - name: Log in to Docker Hub  # Step to log in to Docker Hub
+        run: |
+          echo "dckr_pat_2YFGPju7TdRPMdeXk7dP-4T9UvE" | docker login -u "blackwolfben" --password-stdin
+
+      - name: Push Docker images to Docker Hub  # Step to push the images
+        run: |
+          docker compose -f Docker/docker-compose.yml push  # Push all images defined in Docker/docker-compose.yml
+
       - name: Deploy Application with Docker  # Step to deploy the application
         run: |
           echo "Deploying the application with Docker..."
           docker compose -f Docker/docker-compose.yml up -d --remove-orphans  # Start the stack in detached mode
           echo "Application deployed successfully."
-
 
       - name: Tear down the previous Docker stack
         run: |
