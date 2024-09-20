@@ -1,8 +1,9 @@
 package service;
 
 
-import Entities.Business.personne.Acteur;
-import Entities.Business.personne.Personne;
+
+import entities.business.personne.Acteur;
+import entities.business.personne.Personne;
 import exceptions.EntityNotFoundException;
 import exceptions.InvalidDataException;
 

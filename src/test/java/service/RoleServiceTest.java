@@ -3,9 +3,11 @@ package service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import Entities.Business.role.Role;
+
+import entities.business.role.Role;
 import persistence.repository.IRoleRepository;
-import web.model.dto.RoleDTO;
+import Web.Model.DTO.RoleDTO;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -34,7 +36,7 @@ public class RoleServiceTest {
         role.setRoleName("Admin");
         when(roleRepository.save(any(Role.class))).thenReturn(role);
 
-        RoleDTO roleDTO = new RoleDTO();
+        RoleDTO roleDTO = new Web.Model.DTO.RoleDTO();
         roleDTO.setRoleName("Admin");
 
         RoleDTO result = roleService.createRole(roleDTO);

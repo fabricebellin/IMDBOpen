@@ -1,8 +1,9 @@
 package persistence.repository;
 
-import Entities.Business.personne.Personne;
-import Entities.Business.personne.Realisateur;
 
+
+import entities.business.personne.Personne;
+import entities.business.personne.Realisateur;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import org.springframework.stereotype.Repository;

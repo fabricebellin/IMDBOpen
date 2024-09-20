@@ -1,7 +1,8 @@
 package persistence.repository;
 
-import Entities.Business.personne.Acteur;
-import Entities.Business.personne.Personne;
+
+import entities.business.personne.Acteur;
+import entities.business.personne.Personne;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

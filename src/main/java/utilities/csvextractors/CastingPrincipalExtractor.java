@@ -1,6 +1,7 @@
 package utilities.csvextractors;
 
-import Entities.Business.CastingPrincipal.CastingPrincipal;
+
+import entities.business.CastingPrincipal.CastingPrincipal;
 import persistence.repository.ICastingPrincipalRepository;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVParserBuilder;

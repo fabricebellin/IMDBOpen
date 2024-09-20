@@ -1,15 +1,17 @@
 package service;
 
-import Entities.Business.role.Role;
+
+import entities.business.role.Role;
 import exceptions.EntityNotFoundException;
 import exceptions.InvalidDataException;
 import persistence.repository.IRoleRepository;
 import persistence.repository.IFilmRepository;
 import persistence.repository.IActeurRepository;
-import web.model.dto.RoleDTO;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import web.model.dto.RoleDTO;
 
 import java.util.List;
 import java.util.stream.Collectors;

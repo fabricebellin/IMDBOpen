@@ -1,6 +1,7 @@
 package service;
 
-import Entities.Business.CastingPrincipal.CastingPrincipal;
+
+import entities.business.CastingPrincipal.CastingPrincipal;
 import exceptions.EntityNotFoundException;
 import exceptions.InvalidDataException;
 import exceptions.ServiceException;

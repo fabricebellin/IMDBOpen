@@ -1,4 +1,4 @@
-package Entities.Business.personne;
+package entities.business.personne;
 
 import java.time.LocalDateTime;
 import jakarta.persistence.*;
@@ -10,7 +10,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Personne implements IPersonne<Long> {
+public class Personne  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

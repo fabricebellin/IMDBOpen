@@ -1,6 +1,7 @@
 package service;
 
-import Entities.Business.pays.Pays;
+
+import entities.business.pays.Pays;
 import persistence.repository.IPaysRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

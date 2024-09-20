@@ -1,4 +1,4 @@
-package Entities.Business.personne;
+package entities.business.personne;
 
 import Entities.generic.IEntity;
 

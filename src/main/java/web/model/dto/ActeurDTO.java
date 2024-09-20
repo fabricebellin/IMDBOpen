@@ -1,7 +1,8 @@
 package web.model.dto;
 
 
-import Entities.Business.personne.Acteur;
+
+import entities.business.personne.Acteur;
 import lombok.Data;
 
 import java.time.LocalDate;

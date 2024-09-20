@@ -3,8 +3,9 @@ package service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import Entities.Business.personne.Acteur;
-import Entities.Business.personne.Personne;
+
+import entities.business.personne.Acteur;
+import entities.business.personne.Personne;
 import persistence.repository.IActeurRepository;
 import persistence.repository.IPersonneRepository;
 import web.model.dto.ActeurDTO;

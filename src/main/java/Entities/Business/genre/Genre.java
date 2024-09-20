@@ -1,4 +1,4 @@
-package Entities.Business.genre;
+package entities.business.genre;
 
 import Entities.Business.Film.Film;
 import jakarta.persistence.*;

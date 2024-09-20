@@ -1,6 +1,7 @@
 package persistence.repository;
 
-import Entities.Business.pays.Pays;
+
+import entities.business.pays.Pays;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

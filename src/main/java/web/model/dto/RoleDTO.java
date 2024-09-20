@@ -1,6 +1,7 @@
 package web.model.dto;
 
-import Entities.Business.role.Role;
+
+import entities.business.role.Role;
 import lombok.Getter;
 import lombok.Setter;
 

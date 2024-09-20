@@ -1,7 +1,8 @@
 package web.model.dto;
 
-import Entities.Business.Film.Film;
-import Entities.Business.pays.Pays;
+
+import entities.business.Film.Film;
+import entities.business.pays.Pays;
 import lombok.Data;
 
 @Data

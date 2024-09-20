@@ -1,4 +1,4 @@
-package Entities.Business.role;
+package entities.business.role;
 
 import jakarta.persistence.*;
 import lombok.*;

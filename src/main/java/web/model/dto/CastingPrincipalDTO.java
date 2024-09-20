@@ -1,6 +1,8 @@
 package web.model.dto;
 
-import Entities.Business.CastingPrincipal.CastingPrincipal;
+
+import entities.business.CastingPrincipal.CastingPrincipal;
+
 import java.time.LocalDateTime;
 
 public class CastingPrincipalDTO {

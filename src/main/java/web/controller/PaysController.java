@@ -1,6 +1,7 @@
 package web.controller;
 
-import Entities.Business.pays.Pays;
+
+import entities.business.pays.Pays;
 import service.PaysService;
 import web.model.dto.PaysDTO;
 import org.springframework.beans.factory.annotation.Autowired;

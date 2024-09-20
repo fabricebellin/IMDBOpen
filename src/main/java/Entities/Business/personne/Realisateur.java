@@ -1,5 +1,6 @@
-package Entities.Business.personne;
+package entities.business.personne;
 
+import entities.business.personne.Personne;
 import jakarta.persistence.*;
 import lombok.*;
 

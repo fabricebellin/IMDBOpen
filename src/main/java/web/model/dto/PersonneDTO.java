@@ -1,7 +1,8 @@
 package web.model.dto;
 
 
-import Entities.Business.personne.Personne;
+
+import entities.business.personne.Personne;
 import lombok.Data;
 
 @Data

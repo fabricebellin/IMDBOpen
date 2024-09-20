@@ -3,7 +3,8 @@ package service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import Entities.Business.pays.Pays;
+
+import entities.business.pays.Pays;
 import persistence.repository.IPaysRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,7 @@
 package service;
 
-import Entities.Business.genre.Genre;
+
+import entities.business.genre.Genre;
 import persistence.repository.IGenreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

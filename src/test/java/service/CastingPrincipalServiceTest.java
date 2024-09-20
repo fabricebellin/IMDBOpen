@@ -3,7 +3,8 @@ package service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import Entities.Business.CastingPrincipal.CastingPrincipal;
+
+import entities.business.CastingPrincipal.CastingPrincipal;
 import persistence.repository.ICastingPrincipalRepository;
 import web.model.dto.CastingPrincipalDTO;
 import org.junit.jupiter.api.BeforeEach;

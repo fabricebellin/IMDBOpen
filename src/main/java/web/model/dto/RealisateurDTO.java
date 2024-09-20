@@ -1,7 +1,8 @@
 package web.model.dto;
 
-import Entities.Business.personne.Personne;
-import Entities.Business.personne.Realisateur;
+
+import entities.business.personne.Personne;
+import entities.business.personne.Realisateur;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
