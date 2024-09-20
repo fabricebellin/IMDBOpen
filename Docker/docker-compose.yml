@@ -1,83 +1,16 @@
 services:
-  mongodb:
-    image: mongo:4.4
-    container_name: MongoDB
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    ports:
-      - "27017:27017"
-    volumes:
-      - ./MongoDBData:/data/db
-    networks:
-      - app-network
-
-  zookeeper:
-    image: confluentinc/cp-zookeeper:8.2.3
-    container_name: zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-    ports:
-      - "2181:2181"
-    networks:
-      - app-network
-
-  kafka:
-    image: confluentinc/cp-kafka:8.2.3
-    container_name: Franz
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    ports:
-      - "9092:9092"
-    volumes:
-      - ./KafkaData:/var/lib/kafka/data
-    depends_on:
-      - zookeeper
-    networks:
-      - app-network
-
-  postgres:
-    image: postgres:14.5
-    container_name: PostgreSQL
-    environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: Product
-      POSTGRES_USER: ${POSTGRES_USER}
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./PostgresData:/var/lib/postgresql/data
-    networks:
-      - app-network
-
   mariadb:
     image: mariadb:10.8
     container_name: MariDb
     environment:
-      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
-      MARIADB_DATABASE: mydatabase
+      MARIADB_ROOT_PASSWORD: ${MARIADB_PASSWORD}
+      MARIADB_DATABASE: ImdbOpenDB
       MARIADB_USER: ${MARIADB_USER}
       MARIADB_PASSWORD: ${MARIADB_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
       - ./MariaDBData:/var/lib/mysql
-    networks:
-      - app-network
-
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2019-latest  # Consider LTS version for SQL Server
-    container_name: SQLServer
-    environment:
-      ACCEPT_EULA: Y
-      SA_PASSWORD: ${SA_PASSWORD}
-    ports:
-      - "1433:1433"
-    volumes:
-      - ./SQLServerData:/var/opt/mssql
     networks:
       - app-network
 
@@ -89,11 +22,11 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/Product
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_DATASOURCE_URL: jdbc:mysql://mariadb:3306/ImdbOpenDB
+      SPRING_DATASOURCE_USERNAME: ${MARIADB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MARIADB_PASSWORD}
     depends_on:
-      - postgres
+      - mariadb
     networks:
       - app-network
 

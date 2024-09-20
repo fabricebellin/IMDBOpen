@@ -1,10 +1,8 @@
-package Entities.Business.Film;
+package entities.business.Film;
 
-import Entities.Business.Genre.Genre;
-import Entities.Business.Pays.Pays;
-import Entities.Business.Personne.Acteur;
-import Entities.Business.Personne.Realisateur;
-import Entities.Generic.IEntity;
+
+import entities.business.genre.Genre;
+import entities.business.pays.Pays;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -21,7 +19,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Film implements IEntity<Long> {
+public class Film implements Entities.generic.IEntity<Long> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

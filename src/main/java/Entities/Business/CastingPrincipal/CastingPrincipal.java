@@ -1,4 +1,4 @@
-package Entities.Business.CastingPrincipal;
+package entities.business.CastingPrincipal;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
