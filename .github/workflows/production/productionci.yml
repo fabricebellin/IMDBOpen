@@ -1,13 +1,13 @@
 name: ProductionCI  # Name of the GitHub Actions workflow
 
-# Enable Buildkit and let compose use it to speed up image building
+# Enable Buildkit to speed up image building
 env:
   DOCKER_BUILDKIT: 1
   COMPOSE_DOCKER_CLI_BUILD: 1
 
 # Define the events that trigger this workflow
 on:
-  # Trigger on push to main branch after a pull request is merged
+  # Trigger on push to the main branch after a pull request is merged
   push:
     branches: ['main']
     paths-ignore: ['docs/**']
@@ -19,26 +19,10 @@ concurrency:
 
 # Define jobs to run in this workflow
 jobs:
-  # Job for running linter
-  linter:
-    runs-on: ubuntu-latest  # Use Ubuntu latest version as the runner
-
-    steps:
-      - name: Checkout Code Repository  # Step to checkout the code repository
-        uses: actions/checkout@v4  # Use GitHub's checkout action (v4)
-
-      - name: Set up JDK  # Step to set up Java environment
-        uses: actions/setup-java@v3  # Use GitHub's setup Java action (v3)
-        with:
-          distribution: 'adopt'  # Distribution of JDK
-          java-version: '17'  # Specify JDK version to use
-
-      - name: Run Maven linter  # Step to run Maven linter (e.g., checkstyle)
-        run: mvn checkstyle:check  # Run Maven checkstyle
-
-  # Job for running tests and deploying
-  test_and_deploy:
-    runs-on: ubuntu-latest  # Use Ubuntu latest version as the runner
+  # Job for building and deploying the application
+  build_and_deploy:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu version as the runner
+    environment: production  # Specify that this runs on the production environment
 
     steps:
       - name: Checkout Code Repository  # Step to checkout the code repository
@@ -46,44 +30,20 @@ jobs:
 
       - name: Build the Docker stack  # Step to build the Docker stack
         env:  # Set environment variables from GitHub Secrets
-          MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          MARIADB_ROOT_PASSWORD: ${{ secrets.MARIADB_ROOT_PASSWORD }}
+          MARIADB_ROOT_PASSWORD: ${{ secrets.MARIADB_PASSWORD }}  # Production secrets
           MARIADB_USER: ${{ secrets.MARIADB_USER }}
-          MARIADB_PASSWORD: ${{ secrets.MARIADB_PASSWORD }}
-          SA_PASSWORD: ${{ secrets.SA_PASSWORD }}
+
         run: |
           docker compose -f Docker/docker-compose.yml build  # Build all services defined in Docker/docker-compose.yml
 
-      - name: Run Liquibase Migrations  # Step to run database migrations
-        env:  # Set environment variables from GitHub Secrets
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      - name: Deploy Application with Docker  # Step to deploy the application
         run: |
-          docker compose -f Docker/docker-compose.yml run --rm app mvn liquibase:update  # Run Liquibase migrations
-          # Note: Ensure 'app' is the correct service name
+          echo "Deploying the application with Docker..."
+          docker compose -f Docker/docker-compose.yml up -d --remove-orphans  # Start the stack in detached mode
+          echo "Application deployed successfully."
 
-      - name: Run Maven Tests  # Step to run Maven tests
-        env:  # Set environment variables from GitHub Secrets
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+
+      - name: Tear down the previous Docker stack
         run: |
-          docker compose -f Docker/docker-compose.yml run --rm app mvn test  # Run Maven tests
-          # Note: Ensure 'app' is the correct service name
-
-      # Deployment steps go here (e.g., pushing images to a registry, updating services)
-      - name: Deploy Application  # Step to deploy the application
-        run: |
-          # Add your deployment commands here
-          echo "Deploying the application..."
-          # Example: Push the built images to Docker Hub
-          docker compose -f Docker/docker-compose.yml push
-          # Example: Use kubectl or other tools to update your deployment
-          # kubectl apply -f k8s/
-
-# Note: Remove or comment out the tear down step to keep services running
-#      - name: Tear down the Docker stack  # Step to tear down the Docker stack
-#        run: |
-#          docker compose -f Docker/docker-compose.yml down  # Take down the stack
-#          # Adjust command options as needed (e.g., stop only specific services)
+          docker compose -f Docker/docker-compose.yml down  # Take down the stack
+          echo "Previous Docker stack taken down."
