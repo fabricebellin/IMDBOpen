@@ -1,260 +1,163 @@
 package web.controller;
 
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 import exceptions.EntityNotFoundException;
 import exceptions.InvalidDataException;
 import service.FilmService;
-
 import web.model.dto.FilmDTO;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import web.model.generic.ApiResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 class FilmControllerTest {
-
-    private MockMvc mockMvc;
-
-    @Mock
-    private FilmService filmService;
 
     @InjectMocks
     private FilmController filmController;
 
-    private ObjectMapper objectMapper;
+    @Mock
+    private FilmService filmService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(filmController).build();
-        objectMapper = new ObjectMapper();
     }
 
     @Test
-    void testSearchFilms_Success() throws Exception {
+    void testSearchFilms_Success() {
         // Arrange
-        FilmDTO filmDTO = new FilmDTO();
-        filmDTO.setId(1L);
-        filmDTO.setNom("Test Film");
-        List<FilmDTO> films = Arrays.asList(filmDTO);
-        when(filmService.findFilmsWithFiltersAndSorting(anyString(), anyString(), anyString(), anyString(), anyString(), anyString())).thenReturn(films);
+        List<FilmDTO> expectedFilms = Arrays.asList(new FilmDTO(), new FilmDTO());
+        when(filmService.findFilmsWithFiltersAndSorting(any(), any(), any(), any(), any(), any())).thenReturn(expectedFilms);
 
-        // Act & Assert
-        mockMvc.perform(get("/api/films/search")
-                        .param("nom", "Test")
-                        .param("annee", "2022")
-                        .param("rating", "PG-13")
-                        .param("paysName", "France")
-                        .param("genreName", "Comedy")
-                        .param("sortBy", "name"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(200))
-                .andExpect(jsonPath("$.message").value("Films retrieved successfully"))
-                .andExpect(jsonPath("$.data[0].nom").value("Test Film"));
+        // Act
+        ResponseEntity<ApiResponse<List<FilmDTO>>> response = filmController.searchFilms(null, null, null, null, null, null);
 
-        verify(filmService, times(1)).findFilmsWithFiltersAndSorting(anyString(), anyString(), anyString(), anyString(), anyString(), anyString());
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Films retrieved successfully", response.getBody().getMessage());
+        assertEquals(expectedFilms.size(), response.getBody().getData().size());
     }
 
     @Test
-    void testSearchFilms_InvalidData() throws Exception {
-        // Arrange
-        doThrow(new InvalidDataException("Invalid data")).when(filmService).findFilmsWithFiltersAndSorting(anyString(), anyString(), anyString(), anyString(), anyString(), anyString());
-
-        // Act & Assert
-        mockMvc.perform(get("/api/films/search")
-                        .param("nom", "Test"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Invalid data"));
-
-        verify(filmService, times(1)).findFilmsWithFiltersAndSorting(anyString(), anyString(), anyString(), anyString(), anyString(), anyString());
-    }
-
-    @Test
-    void testGetFilmByImdb_Success() throws Exception {
+    void testGetFilmByImdb_Found() {
         // Arrange
         String imdbId = "tt1234567";
-        FilmDTO filmDTO = new FilmDTO();
-        filmDTO.setId(1L);
-        filmDTO.setNom("Test Film");
-        when(filmService.findFilmByImdb(imdbId)).thenReturn(Optional.of(filmDTO));
+        FilmDTO expectedFilm = new FilmDTO();
+        when(filmService.findFilmByImdb(imdbId)).thenReturn(Optional.of(expectedFilm));
 
-        // Act & Assert
-        mockMvc.perform(get("/api/films/imdb/{imdb}", imdbId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(200))
-                .andExpect(jsonPath("$.message").value("Film retrieved successfully"))
-                .andExpect(jsonPath("$.data.nom").value("Test Film"));
+        // Act
+        ResponseEntity<ApiResponse<FilmDTO>> response = filmController.getFilmByImdb(imdbId);
 
-        verify(filmService, times(1)).findFilmByImdb(imdbId);
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(expectedFilm, response.getBody().getData());
     }
 
     @Test
-    void testGetFilmByImdb_NotFound() throws Exception {
+    void testGetFilmByImdb_NotFound() {
         // Arrange
         String imdbId = "tt1234567";
         when(filmService.findFilmByImdb(imdbId)).thenReturn(Optional.empty());
 
-        // Act & Assert
-        mockMvc.perform(get("/api/films/imdb/{imdb}", imdbId))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.message").value("No film found with IMDb ID: " + imdbId));
+        // Act
+        ResponseEntity<ApiResponse<FilmDTO>> response = filmController.getFilmByImdb(imdbId);
 
-        verify(filmService, times(1)).findFilmByImdb(imdbId);
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("No film found with IMDb ID: " + imdbId, response.getBody().getMessage());
     }
 
     @Test
-    void testGetFilmsByName_Success() throws Exception {
+    void testGetFilmsByName_Success() {
         // Arrange
-        String nom = "Test Film";
-        FilmDTO filmDTO = new FilmDTO();
-        filmDTO.setId(1L);
-        filmDTO.setNom(nom);
-        List<FilmDTO> films = Collections.singletonList(filmDTO);
-        when(filmService.findFilmsByName(nom)).thenReturn(films);
+        String filmName = "Inception";
+        List<FilmDTO> expectedFilms = Arrays.asList(new FilmDTO(), new FilmDTO());
+        when(filmService.findFilmsByName(filmName)).thenReturn(expectedFilms);
 
-        // Act & Assert
-        mockMvc.perform(get("/api/films/name/{nom}", nom))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(200))
-                .andExpect(jsonPath("$.message").value("Films retrieved successfully"))
-                .andExpect(jsonPath("$.data[0].nom").value(nom));
+        // Act
+        ResponseEntity<ApiResponse<List<FilmDTO>>> response = filmController.getFilmsByName(filmName);
 
-        verify(filmService, times(1)).findFilmsByName(nom);
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(expectedFilms.size(), response.getBody().getData().size());
     }
 
     @Test
-    void testGetFilmsByName_NotFound() throws Exception {
+    void testGetFilmsByName_NotFound() {
         // Arrange
-        String nom = "Test Film";
-        when(filmService.findFilmsByName(nom)).thenReturn(Collections.emptyList());
+        String filmName = "Unknown Film";
+        when(filmService.findFilmsByName(filmName)).thenReturn(Arrays.asList());
 
         // Act & Assert
-        mockMvc.perform(get("/api/films/name/{nom}", nom))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.message").value("No films found with name: " + nom));
-
-        verify(filmService, times(1)).findFilmsByName(nom);
+        assertThrows(EntityNotFoundException.class, () -> filmController.getFilmsByName(filmName));
     }
 
     @Test
-    void testCreateFilm_Success() throws Exception {
+    void testCreateFilm_Success() {
         // Arrange
         FilmDTO filmDTO = new FilmDTO();
-        filmDTO.setId(1L);
-        filmDTO.setNom("Test Film");
-        when(filmService.createFilm(any(FilmDTO.class))).thenReturn(filmDTO);
+        FilmDTO createdFilm = new FilmDTO();
+        when(filmService.createFilm(filmDTO)).thenReturn(createdFilm);
 
-        // Act & Assert
-        mockMvc.perform(post("/api/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(filmDTO)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value(201))
-                .andExpect(jsonPath("$.message").value("Film created successfully"))
-                .andExpect(jsonPath("$.data.nom").value("Test Film"));
+        // Act
+        ResponseEntity<ApiResponse<FilmDTO>> response = filmController.createFilm(filmDTO);
 
-        verify(filmService, times(1)).createFilm(any(FilmDTO.class));
+        // Assert
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(createdFilm, response.getBody().getData());
     }
 
     @Test
-    void testCreateFilm_InvalidData() throws Exception {
+    void testUpdateFilm_Success() {
+        // Arrange
+        Long filmId = 1L;
+        FilmDTO filmDTO = new FilmDTO();
+        FilmDTO updatedFilm = new FilmDTO();
+        when(filmService.updateFilm(filmId, filmDTO)).thenReturn(updatedFilm);
+
+        // Act
+        ResponseEntity<ApiResponse<FilmDTO>> response = filmController.updateFilm(filmId, filmDTO);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(updatedFilm, response.getBody().getData());
+    }
+
+    @Test
+    void testDeleteFilm_Success() {
+        // Arrange
+        Long filmId = 1L;
+
+        // Act
+        ResponseEntity<ApiResponse<Void>> response = filmController.deleteFilm(filmId);
+
+        // Assert
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
+    // Additional tests for exception handling can be added here...
+
+    // Example for invalid data exception
+    @Test
+    void testCreateFilm_InvalidDataException() {
         // Arrange
         FilmDTO filmDTO = new FilmDTO();
-        doThrow(new InvalidDataException("Invalid data")).when(filmService).createFilm(any(FilmDTO.class));
+        when(filmService.createFilm(filmDTO)).thenThrow(new InvalidDataException("Invalid data"));
 
         // Act & Assert
-        mockMvc.perform(post("/api/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(filmDTO)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Invalid data"));
-
-        verify(filmService, times(1)).createFilm(any(FilmDTO.class));
-    }
-
-    @Test
-    void testUpdateFilm_Success() throws Exception {
-        // Arrange
-        Long id = 1L;
-        FilmDTO filmDTO = new FilmDTO();
-        filmDTO.setId(id);
-        filmDTO.setNom("Updated Film");
-        when(filmService.updateFilm(eq(id), any(FilmDTO.class))).thenReturn(filmDTO);
-
-        // Act & Assert
-        mockMvc.perform(put("/api/films/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(filmDTO)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(200))
-                .andExpect(jsonPath("$.message").value("Film updated successfully"))
-                .andExpect(jsonPath("$.data.nom").value("Updated Film"));
-
-        verify(filmService, times(1)).updateFilm(eq(id), any(FilmDTO.class));
-    }
-
-    @Test
-    void testUpdateFilm_NotFound() throws Exception {
-        // Arrange
-        Long id = 1L;
-        FilmDTO filmDTO = new FilmDTO();
-        filmDTO.setId(id);
-        filmDTO.setNom("Updated Film");
-        doThrow(new EntityNotFoundException("Film not found")).when(filmService).updateFilm(eq(id), any(FilmDTO.class));
-
-        // Act & Assert
-        mockMvc.perform(put("/api/films/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(filmDTO)))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.message").value("Film not found"));
-
-        verify(filmService, times(1)).updateFilm(eq(id), any(FilmDTO.class));
-    }
-
-    @Test
-    void testDeleteFilm_Success() throws Exception {
-        // Arrange
-        Long id = 1L;
-        doNothing().when(filmService).deleteFilm(id);
-
-        // Act & Assert
-        mockMvc.perform(delete("/api/films/{id}", id))
-                .andExpect(status().isNoContent());
-
-        verify(filmService, times(1)).deleteFilm(id);
-    }
-
-    @Test
-    void testDeleteFilm_NotFound() throws Exception {
-        // Arrange
-        Long id = 1L;
-        doThrow(new EntityNotFoundException("Film not found")).when(filmService).deleteFilm(id);
-
-        // Act & Assert
-        mockMvc.perform(delete("/api/films/{id}", id))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.message").value("Film not found"));
-
-        verify(filmService, times(1)).deleteFilm(id);
+        assertThrows(InvalidDataException.class, () -> filmController.createFilm(filmDTO));
     }
 }

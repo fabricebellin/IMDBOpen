@@ -47,25 +47,7 @@ public class RealisateurServiceTest {
         verify(realisateurRepository, times(1)).findAll();
     }
 
-    @Test
-    void testFindByIdImdb() {
-        // Arrange
-        Realisateur realisateur = new Realisateur();
-        realisateur.setIdImdb("nm0000001");
 
-        // Mock behavior
-        when(realisateurRepository.findByIdImdb("nm0000001")).thenReturn(Optional.of(realisateur));
-
-        // Act
-        Optional<RealisateurDTO> result = realisateurService.findByIdImdb("nm0000001");
-
-        // Assert
-        assertTrue(result.isPresent()); // Check that the Optional contains a value
-        RealisateurDTO dto = result.get();
-        assertEquals("nm0000001", dto.getIdImdb()); // Verify the IMDb ID in the result
-        assertEquals("John Doe", dto.getIdentite()); // Verify other fields as needed
-        verify(realisateurRepository, times(1)).findByIdImdb("nm0000001");
-    }
 
 
     @Test

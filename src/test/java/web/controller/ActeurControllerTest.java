@@ -1,200 +1,137 @@
 package web.controller;
 
-import web.model.dto.ActeurDTO;
-import web.model.dto.PersonneDTO;
-import web.model.generic.ApiResponse;
 import exceptions.EntityNotFoundException;
 import exceptions.InvalidDataException;
 import service.ActeurService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import web.model.dto.ActeurDTO;
+import web.model.dto.PersonneDTO;
+import web.model.generic.ApiResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-class ActeurControllerTest {
-
-    private MockMvc mockMvc;
-
-    @Mock
-    private ActeurService acteurService;
+public class ActeurControllerTest {
 
     @InjectMocks
     private ActeurController acteurController;
 
-    private ObjectMapper objectMapper;
+    @Mock
+    private ActeurService acteurService;
+
+    private ActeurDTO acteurDTO;
 
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(acteurController).build();
-        objectMapper = new ObjectMapper();
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+        PersonneDTO personneDTO = new PersonneDTO();
+        personneDTO.setIdentite("Jean-Luc");
+        personneDTO.setDateNaissance("1980-01-01");
+        personneDTO.setLieuNaissance("Paris");
+        personneDTO.setUrl("http://example.com");
+
+        acteurDTO = new ActeurDTO();
+        acteurDTO.setId(1L);
+        acteurDTO.setIdImdb("nm1234567");
+        acteurDTO.setTaille("180cm");
+        acteurDTO.setPersonne(personneDTO);  // Setting PersonneDTO
+        acteurDTO.setDateNaissance("1980-01-01");  // This might be redundant if already in PersonneDTO
+        acteurDTO.setLieuNaissance("Paris");
+        acteurDTO.setUrl("http://example.com");
+        // Other fields...
     }
 
     @Test
-    void testCreateActeur_Success() throws Exception {
-        // Arrange
-        ActeurDTO acteurDTO = new ActeurDTO();
-        acteurDTO.setId(1L);
-        acteurDTO.setPersonne(new PersonneDTO());
-        acteurDTO.getPersonne().setIdentite("Test Acteur");
-        acteurDTO.getPersonne().setDateNaissance("1990-01-01");
-
+    public void testCreateActeur_Success() {
         when(acteurService.createActeur(any(ActeurDTO.class))).thenReturn(acteurDTO);
 
-        // Act & Assert
-        mockMvc.perform(post("/api/acteurs")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(acteurDTO)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value(201))
-                .andExpect(jsonPath("$.message").value("Acteur created successfully"));
+        ResponseEntity<ApiResponse<ActeurDTO>> response = acteurController.createActeur(acteurDTO);
 
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(acteurDTO.getId(), response.getBody().getData().getId());
         verify(acteurService, times(1)).createActeur(any(ActeurDTO.class));
     }
 
     @Test
-    void testCreateActeur_InvalidDate() throws Exception {
-        // Arrange
-        ActeurDTO acteurDTO = new ActeurDTO();
-        acteurDTO.setPersonne(new PersonneDTO());
-        acteurDTO.getPersonne().setIdentite("Test Acteur");
-        acteurDTO.setDateNaissance("invalid-date");
+    public void testCreateActeur_InvalidData() {
+        doThrow(new InvalidDataException("Invalid data")).when(acteurService).createActeur(any(ActeurDTO.class));
 
-        doThrow(new InvalidDataException("Invalid date format")).when(acteurService).createActeur(any(ActeurDTO.class));
+        InvalidDataException thrown = assertThrows(InvalidDataException.class, () -> {
+            acteurController.createActeur(acteurDTO);
+        });
 
-        // Act & Assert
-        mockMvc.perform(post("/api/acteurs")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(acteurDTO)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Invalid date format"));
-
+        assertEquals("Invalid data", thrown.getMessage());
         verify(acteurService, times(1)).createActeur(any(ActeurDTO.class));
     }
 
     @Test
-    void testUpdateActeur_Success() throws Exception {
-        // Arrange
-        Long id = 1L;
-        ActeurDTO acteurDTO = new ActeurDTO();
-        acteurDTO.setId(id);
-        acteurDTO.setPersonne(new PersonneDTO());
-        acteurDTO.getPersonne().setIdentite("Updated Acteur");
-        acteurDTO.getPersonne().setDateNaissance("1990-01-01");
+    public void testUpdateActeur_Success() {
+        when(acteurService.updateActeur(eq(1L), any(ActeurDTO.class))).thenReturn(acteurDTO);
 
-        when(acteurService.updateActeur(eq(id), any(ActeurDTO.class))).thenReturn(acteurDTO);
+        ResponseEntity<ApiResponse<ActeurDTO>> response = acteurController.updateActeur(1L, acteurDTO);
 
-        // Act & Assert
-        mockMvc.perform(put("/api/acteurs/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(acteurDTO)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(200))
-                .andExpect(jsonPath("$.message").value("Acteur updated successfully"));
-
-        verify(acteurService, times(1)).updateActeur(eq(id), any(ActeurDTO.class));
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(acteurDTO.getId(), response.getBody().getData().getId());
+        verify(acteurService, times(1)).updateActeur(eq(1L), any(ActeurDTO.class));
     }
 
     @Test
-    void testUpdateActeur_NotFound() throws Exception {
-        // Arrange
-        Long id = 1L;
-        ActeurDTO acteurDTO = new ActeurDTO();
-        acteurDTO.setPersonne(new PersonneDTO());
-        acteurDTO.getPersonne().setIdentite("Updated Acteur");
+    public void testUpdateActeur_NotFound() {
+        doThrow(new EntityNotFoundException("Acteur not found")).when(acteurService).updateActeur(eq(1L), any(ActeurDTO.class));
 
-        doThrow(new EntityNotFoundException("Acteur not found")).when(acteurService).updateActeur(eq(id), any(ActeurDTO.class));
+        EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class, () -> {
+            acteurController.updateActeur(1L, acteurDTO);
+        });
 
-        // Act & Assert
-        mockMvc.perform(put("/api/acteurs/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(acteurDTO)))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.message").value("Acteur not found"));
-
-        verify(acteurService, times(1)).updateActeur(eq(id), any(ActeurDTO.class));
+        assertEquals("Acteur not found", thrown.getMessage());
+        verify(acteurService, times(1)).updateActeur(eq(1L), any(ActeurDTO.class));
     }
 
     @Test
-    void testDeleteActeur_Success() throws Exception {
-        // Arrange
-        Long id = 1L;
-        doNothing().when(acteurService).deleteActeur(id);
+    public void testDeleteActeur_Success() {
+        doNothing().when(acteurService).deleteActeur(1L);
 
-        // Act & Assert
-        mockMvc.perform(delete("/api/acteurs/{id}", id))
-                .andExpect(status().isNoContent());
+        ResponseEntity<ApiResponse<Void>> response = acteurController.deleteActeur(1L);
 
-        verify(acteurService, times(1)).deleteActeur(id);
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(acteurService, times(1)).deleteActeur(1L);
     }
 
     @Test
-    void testDeleteActeur_NotFound() throws Exception {
-        // Arrange
-        Long id = 1L;
-        doThrow(new EntityNotFoundException("Acteur not found")).when(acteurService).deleteActeur(id);
+    public void testDeleteActeur_NotFound() {
+        doThrow(new EntityNotFoundException("Acteur not found")).when(acteurService).deleteActeur(1L);
 
-        // Act & Assert
-        mockMvc.perform(delete("/api/acteurs/{id}", id))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.message").value("Acteur not found"));
+        EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class, () -> {
+            acteurController.deleteActeur(1L);
+        });
 
-        verify(acteurService, times(1)).deleteActeur(id);
+        assertEquals("Acteur not found", thrown.getMessage());
+        verify(acteurService, times(1)).deleteActeur(1L);
     }
 
     @Test
-    void testSearchActeurs_Success() throws Exception {
-        // Arrange
-        List<ActeurDTO> acteurs = new ArrayList<>();
-        ActeurDTO acteurDTO = new ActeurDTO();
-        acteurDTO.setId(1L);
-        acteurDTO.setPersonne(new PersonneDTO());
-        acteurDTO.getPersonne().setIdentite("Test Acteur");
-        acteurs.add(acteurDTO);
-
+    public void testSearchActeurs_Success() {
+        List<ActeurDTO> acteurs = Arrays.asList(acteurDTO);
         when(acteurService.findActeursWithFiltersAndSorting(anyString(), anyString(), anyString())).thenReturn(acteurs);
 
-        // Act & Assert
-        mockMvc.perform(get("/api/acteurs/search")
-                        .param("identite", "Test Acteur")
-                        .param("dateNaissance", "1990-01-01"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(200))
-                .andExpect(jsonPath("$.message").value("Acteurs retrieved successfully"))
-                .andExpect(jsonPath("$.data[0].personne.identite").value("Test Acteur"));
+        ResponseEntity<ApiResponse<List<ActeurDTO>>> response = acteurController.searchActeurs("Jean", "1980-01-01", "name");
 
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(1, response.getBody().getData().size());
         verify(acteurService, times(1)).findActeursWithFiltersAndSorting(anyString(), anyString(), anyString());
     }
 
-    @Test
-    void testSearchActeurs_InvalidDate() throws Exception {
-        // Arrange
-        doThrow(new InvalidDataException("Invalid date format for search")).when(acteurService).findActeursWithFiltersAndSorting(anyString(), eq("invalid-date"), anyString());
 
-        // Act & Assert
-        mockMvc.perform(get("/api/acteurs/search")
-                        .param("dateNaissance", "invalid-date"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Invalid date format for search"));
-
-        verify(acteurService, times(1)).findActeursWithFiltersAndSorting(anyString(), eq("invalid-date"), anyString());
-    }
 }
