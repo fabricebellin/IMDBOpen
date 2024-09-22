@@ -1,9 +1,9 @@
 # Run MariaDB
 docker run -d --name MariDb \
-  -e MARIADB_ROOT_PASSWORD=bl@dg3r$$ \
+  -e MARIADB_ROOT_PASSWORD=Witness@2323$$ \
   -e MARIADB_DATABASE=ImDbOpenDB \
   -e MARIADB_USER=myuser \
-  -e MARIADB_PASSWORD=bl@dg3r$$ \
+  -e MARIADB_PASSWORD=Witness@2323$$ \
   -p 3306:3306 \
   -v "B:/MariaDBData:/var/lib/mysql" \
   mariadb:10.8  # Stable version
